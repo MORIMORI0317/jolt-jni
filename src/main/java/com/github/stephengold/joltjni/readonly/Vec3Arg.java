@@ -40,6 +40,23 @@ public interface Vec3Arg {
     Vec3 abs();
 
     /**
+     * Copy all 3 components to the specified array. The vector is unaffected.
+     *
+     * @param storeArray the destination array (not {@code null}, length&ge;3)
+     */
+    void copyTo(float[] storeArray);
+
+    /**
+     * Copy all 3 components to the specified position in the specified array.
+     * The vector is unaffected.
+     *
+     * @param storeArray the destination array (not {@code null},
+     * length&ge;startPosition+3)
+     * @param startPosition the starting position in the array (&ge;0)
+     */
+    void copyTo(float[] storeArray, int startPosition);
+
+    /**
      * Write all 3 components to the start of the specified buffer. The vector
      * is unaffected.
      *
@@ -50,12 +67,13 @@ public interface Vec3Arg {
 
     /**
      * Write all 3 components to the specified position in the specified buffer.
+     * The vector is unaffected.
      *
      * @param storeFloats the destination buffer (not {@code null},
-     * capacity&ge;startPos+3)
-     * @param startPos the starting position in the buffer (&ge;0)
+     * capacity&ge;startPosition+3)
+     * @param startPosition the starting position in the buffer (&ge;0)
      */
-    void copyTo(FloatBuffer storeFloats, int startPos);
+    void copyTo(FloatBuffer storeFloats, int startPosition);
 
     /**
      * Return the cross product with the argument. Both vectors are unaffected.
@@ -270,21 +288,21 @@ public interface Vec3Arg {
     Vec3 swizzle(int xi, int yi, int zi);
 
     /**
-     * Copy the components to an array. The vector is unaffected.
+     * Copy all 3 components to a new array. The vector is unaffected.
      *
      * @return a new array with length=3
      */
     float[] toArray();
 
     /**
-     * Copy the components to a direct buffer. The vector is unaffected.
+     * Copy all 3 components to a new direct buffer. The vector is unaffected.
      *
      * @return a new direct buffer with capacity=3
      */
     FloatBuffer toBuffer();
 
     /**
-     * Copy the components to a new location vector. The current vector is
+     * Copy all 3 components to a new location vector. The current vector is
      * unaffected.
      *
      * @return a new vector

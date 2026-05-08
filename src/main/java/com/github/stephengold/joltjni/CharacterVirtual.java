@@ -167,7 +167,7 @@ public class CharacterVirtual
     /**
      * Replace the char-vs-char collision interface.
      *
-     * @param cvcInterface the desired interface (not null)
+     * @param cvcInterface the desired interface (not {@code null})
      */
     public void setCharacterVsCharacterCollision(
             CharacterVsCharacterCollision cvcInterface) {
@@ -203,7 +203,7 @@ public class CharacterVirtual
      * Alter the shape of the inner body. Invoke this after a successful
      * invocation of {@code setShape()}.
      *
-     * @param shape the desired shape (not null, unaffected, default=?)
+     * @param shape the desired shape (not {@code null}, unaffected, default=?)
      */
     public void setInnerBodyShape(ConstShape shape) {
         long characterVa = va();
@@ -416,12 +416,9 @@ public class CharacterVirtual
     @Override
     public Vec3 cancelVelocityTowardsSteepSlopes(Vec3Arg desiredVelocity) {
         long characterVa = va();
-        float vx = desiredVelocity.getX();
-        float vy = desiredVelocity.getY();
-        float vz = desiredVelocity.getZ();
-        float[] storeVelocity = new float[3];
-        cancelVelocityTowardsSteepSlopes(
-                characterVa, vx, vy, vz, storeVelocity);
+        FloatBuffer storeVelocity = Temporaries.floatBuffer1.get();
+        desiredVelocity.copyTo(storeVelocity);
+        cancelVelocityTowardsSteepSlopes(characterVa, storeVelocity);
         Vec3 result = new Vec3(storeVelocity);
 
         return result;
@@ -458,7 +455,7 @@ public class CharacterVirtual
         ConstContact[] result = new ConstContact[numContacts];
         for (int i = 0; i < numContacts; ++i) {
             long contactVa = getActiveContact(characterVa, i);
-            result[i] = new Contact(contactVa, true);
+            result[i] = new Contact(contactVa, true, system);
         }
 
         return result;
@@ -807,7 +804,7 @@ public class CharacterVirtual
      * specified character during the previous time step. The current character
      * is unaffected.
      *
-     * @param otherCharacter the character to test against (not null,
+     * @param otherCharacter the character to test against (not {@code null},
      * unaffected)
      * @return {@code true} if contact or collision, otherwise {@code false}
      */
@@ -837,8 +834,7 @@ public class CharacterVirtual
     // native methods
 
     native static void cancelVelocityTowardsSteepSlopes(
-            long characterVa, float vx, float vy, float vz,
-            float[] storeVelocity);
+            long characterVa, FloatBuffer storeVelocity);
 
     native static boolean canWalkStairs(
             long characterVa, float vx, float vy, float vz);

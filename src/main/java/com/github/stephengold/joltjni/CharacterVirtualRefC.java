@@ -46,7 +46,7 @@ final public class CharacterVirtualRefC
     /**
      * cache the target to avoid duplication
      */
-    private ConstCharacterVirtual ptr;
+    final private ConstCharacterVirtual ptr;
     // *************************************************************************
     // constructors
 
@@ -55,11 +55,11 @@ final public class CharacterVirtualRefC
      *
      * @param refVa the virtual address of the native object to assign (not
      * zero)
-     * @param character the character to target (not {@code null})
+     * @param target the character to target (not {@code null})
      */
-    CharacterVirtualRefC(long refVa, ConstCharacterVirtual character) {
-        this.ptr = character;
-        ConstPhysicsSystem physicsSystem = character.getPhysicsSystem();
+    CharacterVirtualRefC(long refVa, ConstCharacterVirtual target) {
+        this.ptr = target;
+        ConstPhysicsSystem physicsSystem = target.getPhysicsSystem();
         /*
          * Passing physicsSystem to the Runnable ensures that the underlying
          * system won't get cleaned before the character.
@@ -93,12 +93,10 @@ final public class CharacterVirtualRefC
     @Override
     public Vec3 cancelVelocityTowardsSteepSlopes(Vec3Arg desiredVelocity) {
         long characterVa = targetVa();
-        float vx = desiredVelocity.getX();
-        float vy = desiredVelocity.getY();
-        float vz = desiredVelocity.getZ();
-        float[] storeVelocity = new float[3];
+        FloatBuffer storeVelocity = Temporaries.floatBuffer1.get();
+        desiredVelocity.copyTo(storeVelocity);
         CharacterVirtual.cancelVelocityTowardsSteepSlopes(
-                characterVa, vx, vy, vz, storeVelocity);
+                characterVa, storeVelocity);
         Vec3 result = new Vec3(storeVelocity);
 
         return result;
@@ -134,9 +132,10 @@ final public class CharacterVirtualRefC
         long characterVa = targetVa();
         int numContacts = CharacterVirtual.countActiveContacts(characterVa);
         ConstContact[] result = new ConstContact[numContacts];
+        PhysicsSystem system = getPhysicsSystem();
         for (int i = 0; i < numContacts; ++i) {
             long contactVa = CharacterVirtual.getActiveContact(characterVa, i);
-            result[i] = new Contact(contactVa, true);
+            result[i] = new Contact(contactVa, true, system);
         }
 
         return result;
@@ -478,8 +477,8 @@ final public class CharacterVirtualRefC
      * @return the pre-existing instance
      */
     @Override
-    public ConstPhysicsSystem getPhysicsSystem() {
-        ConstPhysicsSystem result = ptr.getPhysicsSystem();
+    public PhysicsSystem getPhysicsSystem() {
+        PhysicsSystem result = ptr.getPhysicsSystem();
         return result;
     }
 

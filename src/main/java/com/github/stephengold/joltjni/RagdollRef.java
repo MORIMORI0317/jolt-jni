@@ -22,8 +22,11 @@ SOFTWARE.
 package com.github.stephengold.joltjni;
 
 import com.github.stephengold.joltjni.enumerate.EActivation;
+import com.github.stephengold.joltjni.readonly.ConstSkeletonPose;
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import com.github.stephengold.joltjni.template.Ref;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 
 /**
  * A counted reference to a {@code Ragdoll}.
@@ -107,7 +110,7 @@ final public class RagdollRef extends Ref {
      * @param pose the desired pose
      * @param time the time interval for achieving the pose (in seconds)
      */
-    public void driveToPoseUsingKinematics(SkeletonPose pose, float time) {
+    public void driveToPoseUsingKinematics(ConstSkeletonPose pose, float time) {
         driveToPoseUsingKinematics(pose, time, true);
     }
 
@@ -119,9 +122,9 @@ final public class RagdollRef extends Ref {
      * @param lockBodies (default=true)
      */
     public void driveToPoseUsingKinematics(
-            SkeletonPose pose, float time, boolean lockBodies) {
+            ConstSkeletonPose pose, float time, boolean lockBodies) {
         long ragdollVa = targetVa();
-        long poseVa = pose.va();
+        long poseVa = pose.targetVa();
         Ragdoll.driveToPoseUsingKinematics(ragdollVa, poseVa, time, lockBodies);
     }
 
@@ -130,10 +133,28 @@ final public class RagdollRef extends Ref {
      *
      * @param pose the desired pose (not {@code null}, unaffected)
      */
-    public void driveToPoseUsingMotors(SkeletonPose pose) {
+    public void driveToPoseUsingMotors(ConstSkeletonPose pose) {
         long ragdollVa = targetVa();
-        long poseVa = pose.va();
+        long poseVa = pose.targetVa();
         Ragdoll.driveToPoseUsingMotors(ragdollVa, poseVa);
+    }
+
+    /**
+     * Drive the ragdoll to the specified pose using motors. Drives to both
+     * target position and target velocity.
+     *
+     * @param prevPose the previous desired pose, used to calculate the target
+     * velocity of each motor (not {@code null}, unaffected)
+     * @param pose the desired pose (not {@code null}, unaffected)
+     * @param deltaTime the time interval between poses (in seconds)
+     */
+    public void driveToPoseUsingMotors(ConstSkeletonPose prevPose,
+            ConstSkeletonPose pose, float deltaTime) {
+        long ragdollVa = targetVa();
+        long prevPoseVa = prevPose.targetVa();
+        long poseVa = pose.targetVa();
+        Ragdoll.driveToPoseUsingMotorsPv(
+                ragdollVa, prevPoseVa, poseVa, deltaTime);
     }
 
     /**
@@ -161,6 +182,21 @@ final public class RagdollRef extends Ref {
         Ragdoll.getBodyIds(ragdollVa, storeIds);
 
         return storeIds;
+    }
+
+    /**
+     * Access the specified constraint.
+     *
+     * @param constraintIndex which constraint to access (&ge;0)
+     * @return a new JVM object with the pre-existing native object assigned
+     */
+    public TwoBodyConstraint getConstraint(int constraintIndex) {
+        long ragdollVa = targetVa();
+        long constraintVa = Ragdoll.getConstraint(ragdollVa, constraintIndex);
+        Constraint constraint = Constraint.newConstraint(constraintVa);
+        TwoBodyConstraint result = (TwoBodyConstraint) constraint;
+
+        return result;
     }
 
     /**
@@ -200,7 +236,7 @@ final public class RagdollRef extends Ref {
     public void getPose(RVec3 storeRootOffset, Mat44Array storeJointMatrices,
             boolean lockBodies) {
         long ragdollVa = targetVa();
-        double[] storeDoubles = new double[3];
+        DoubleBuffer storeDoubles = Temporaries.doubleBuffer1.get();
         long storeMatsVa = storeJointMatrices.va();
         Ragdoll.getPose(ragdollVa, storeDoubles, storeMatsVa, lockBodies);
         storeRootOffset.set(storeDoubles);
@@ -254,8 +290,8 @@ final public class RagdollRef extends Ref {
     public void getRootTransform(
             RVec3 storeLocation, Quat storeOrientation, boolean lockBodies) {
         long ragdollVa = targetVa();
-        double[] storeDoubles = new double[3];
-        float[] storeFloats = new float[4];
+        DoubleBuffer storeDoubles = Temporaries.doubleBuffer1.get();
+        FloatBuffer storeFloats = Temporaries.floatBuffer1.get();
         Ragdoll.getRootTransform(
                 ragdollVa, storeDoubles, storeFloats, lockBodies);
         storeLocation.set(storeDoubles);
@@ -275,7 +311,7 @@ final public class RagdollRef extends Ref {
      *
      * @param pose the desired pose (not {@code null}, unaffected)
      */
-    public void setPose(SkeletonPose pose) {
+    public void setPose(ConstSkeletonPose pose) {
         setPose(pose, true);
     }
 
@@ -286,9 +322,9 @@ final public class RagdollRef extends Ref {
      * @param lockBodies true&rarr;use the locking body interface,
      * false&rarr;use the non-locking body interface
      */
-    public void setPose(SkeletonPose pose, boolean lockBodies) {
+    public void setPose(ConstSkeletonPose pose, boolean lockBodies) {
         long ragdollVa = targetVa();
-        long poseVa = pose.va();
+        long poseVa = pose.targetVa();
         Ragdoll.setPose(ragdollVa, poseVa, lockBodies);
     }
     // *************************************************************************

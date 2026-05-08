@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2025-2026 Stephen Gold
+Copyright (c) 2026 Stephen Gold
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,41 +21,27 @@ SOFTWARE.
  */
 package com.github.stephengold.joltjni.readonly;
 
+import com.github.stephengold.joltjni.Quat;
+import com.github.stephengold.joltjni.Vec3;
+
 /**
- * Read-only access to a {@code CollisionGroup}.
+ * Read-only access to a {@code JointState}. (native type: const
+ * SkeletonPose::JointState)
  *
  * @author Stephen Gold sgold@sonic.net
  */
-public interface ConstCollisionGroup extends ConstJoltPhysicsObject {
+public interface ConstJointState extends ConstJoltPhysicsObject {
     /**
-     * Access the group filter.
+     * Copy the rotation. The state is unaffected.
      *
-     * @return a new JVM object with the pre-existing native object assigned, or
-     * {@code null} if none
+     * @return a new rotation quaternion
      */
-    ConstGroupFilter getGroupFilter();
+    Quat getRotation();
 
     /**
-     * Return the main group ID. The group is unaffected.
+     * Copy the translation offset. The state is unaffected.
      *
-     * @return the {@code GroupID} value
+     * @return a new offset vector
      */
-    int getGroupId();
-
-    /**
-     * Return the subgroup ID. The group is unaffected.
-     *
-     * @return the {@code SubGroupID} value
-     */
-    int getSubGroupId();
-
-    /**
-     * Test whether this object is equal to the argument. Both objects are
-     * unaffected.
-     *
-     * @param other the properties to compare with (not {@code null},
-     * unaffected)
-     * @return {@code true} if equal, {@code false} if unequal
-     */
-    boolean isEqual(ConstCollisionGroup other);
+    Vec3 getTranslation();
 }

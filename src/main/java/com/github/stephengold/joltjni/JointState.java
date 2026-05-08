@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2024-2025 Stephen Gold
+Copyright (c) 2024-2026 Stephen Gold
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@ SOFTWARE.
  */
 package com.github.stephengold.joltjni;
 
+import com.github.stephengold.joltjni.readonly.ConstJointState;
 import com.github.stephengold.joltjni.readonly.QuatArg;
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import java.nio.FloatBuffer;
@@ -31,7 +32,7 @@ import java.nio.FloatBuffer;
  *
  * @author Stephen Gold sgold@sonic.net
  */
-public class JointState extends JoltPhysicsObject {
+public class JointState extends JoltPhysicsObject implements ConstJointState {
     // *************************************************************************
     // constructors
 
@@ -49,10 +50,53 @@ public class JointState extends JoltPhysicsObject {
     // new methods exposed
 
     /**
+     * Copy both components from the argument.
+     *
+     * @param source the state to copy (not {@code null}, unaffected)
+     */
+    public void set(ConstJointState source) {
+        long targetVa = va();
+        long sourceVa = source.targetVa();
+        set(targetVa, sourceVa);
+    }
+
+    /**
+     * Alter the rotation component. (native attribute: mRotation)
+     *
+     * @param rotation the desired rotation (not {@code null}, unaffected,
+     * default=(0,0,0,1))
+     */
+    public void setRotation(QuatArg rotation) {
+        long stateVa = va();
+        float qw = rotation.getW();
+        float qx = rotation.getX();
+        float qy = rotation.getY();
+        float qz = rotation.getZ();
+        setRotation(stateVa, qx, qy, qz, qw);
+    }
+
+    /**
+     * Alter the translation offset component. (native attribute: mTranslation)
+     *
+     * @param offset the desired offset (not {@code null}, unaffected,
+     * default=(0,0,0))
+     */
+    public void setTranslation(Vec3Arg offset) {
+        long stateVa = va();
+        float x = offset.getX();
+        float y = offset.getY();
+        float z = offset.getZ();
+        setTranslation(stateVa, x, y, z);
+    }
+    // *************************************************************************
+    // ConstJointState methods
+
+    /**
      * Copy the rotation. The state is unaffected. (native attribute: mRotation)
      *
      * @return a new rotation quaternion
      */
+    @Override
     public Quat getRotation() {
         long stateVa = va();
         FloatBuffer storeFloats = Temporaries.floatBuffer1.get();
@@ -68,6 +112,7 @@ public class JointState extends JoltPhysicsObject {
      *
      * @return a new offset vector
      */
+    @Override
     public Vec3 getTranslation() {
         long stateVa = va();
         FloatBuffer storeFloats = Temporaries.floatBuffer1.get();
@@ -75,33 +120,6 @@ public class JointState extends JoltPhysicsObject {
         Vec3 result = new Vec3(storeFloats);
 
         return result;
-    }
-
-    /**
-     * Alter the rotation. (native attribute: mRotation)
-     *
-     * @param rotation the desired rotation (not null, unaffected)
-     */
-    public void setRotation(QuatArg rotation) {
-        long stateVa = va();
-        float qw = rotation.getW();
-        float qx = rotation.getX();
-        float qy = rotation.getY();
-        float qz = rotation.getZ();
-        setRotation(stateVa, qx, qy, qz, qw);
-    }
-
-    /**
-     * Alter the translation offset. (native attribute: mTranslation)
-     *
-     * @param offset the desired offset (not null, unaffected)
-     */
-    public void setTranslation(Vec3Arg offset) {
-        long stateVa = va();
-        float x = offset.getX();
-        float y = offset.getY();
-        float z = offset.getZ();
-        setTranslation(stateVa, x, y, z);
     }
     // *************************************************************************
     // native private methods
@@ -111,6 +129,8 @@ public class JointState extends JoltPhysicsObject {
 
     native private static void getTranslation(
             long stateVa, FloatBuffer storeFloats);
+
+    native private static void set(long targetVa, long sourceVa);
 
     native private static void setRotation(
             long stateVa, float qx, float qy, float qz, float qw);

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2024-2025 Stephen Gold
+Copyright (c) 2024-2026 Stephen Gold
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Read an ID vector.
      *
-     * @param storeResult storage for the result (not null, modified)
+     * @param storeResult storage for the result (not {@code null}, modified)
      */
     public void readBodyIdVector(BodyIdVector storeResult) {
         long recorderVa = va();
@@ -79,6 +79,17 @@ public class StateRecorder extends NonCopyable {
         boolean result = readBoolean(recorderVa, b);
 
         return result;
+    }
+
+    /**
+     * Read a contact set.
+     *
+     * @param storeResult storage for the result (not {@code null}, modified)
+     */
+    public void read(ContactSet storeResult) {
+        long recorderVa = va();
+        long setVa = storeResult.va();
+        readContactSet(recorderVa, setVa);
     }
 
     /**
@@ -110,7 +121,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Read a matrix.
      *
-     * @param inOut the value for validation (not null, modified)
+     * @param inOut the value for validation (not {@code null}, modified)
      */
     public void readRMat44(RMat44 inOut) {
         long recorderVa = va();
@@ -121,7 +132,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Read a location vector.
      *
-     * @param inOut the value for validation (not null, modified)
+     * @param inOut the value for validation (not {@code null}, modified)
      */
     public void readRVec3(RVec3 inOut) {
         long recorderVa = va();
@@ -134,7 +145,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Read a string of text.
      *
-     * @param javaString the value for validation (not null)
+     * @param javaString the value for validation (not {@code null})
      * @return the string that was read
      */
     public String readString(String javaString) {
@@ -147,7 +158,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Read a vector.
      *
-     * @param inOut the value for validation (not null, modified)
+     * @param inOut the value for validation (not {@code null}, modified)
      */
     public void readVec3(Vec3 inOut) {
         long recorderVa = va();
@@ -171,7 +182,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Write the specified ID vector.
      *
-     * @param vector the vector to write (not null, unaffected)
+     * @param vector the vector to write (not {@code null}, unaffected)
      */
     public void write(BodyIdVector vector) {
         long recorderVa = va();
@@ -187,6 +198,17 @@ public class StateRecorder extends NonCopyable {
     public void write(boolean b) {
         long recorderVa = va();
         writeBoolean(recorderVa, b);
+    }
+
+    /**
+     * Write the specified contact set.
+     *
+     * @param set the set to write (not {@code null}, unaffected)
+     */
+    public void write(ContactSet set) {
+        long recorderVa = va();
+        long setVa = set.va();
+        writeContactSet(recorderVa, setVa);
     }
 
     /**
@@ -212,7 +234,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Write the value of the specified matrix.
      *
-     * @param matrix the matrix to write (not null, unaffected)
+     * @param matrix the matrix to write (not {@code null}, unaffected)
      */
     public void write(RMat44Arg matrix) {
         long recorderVa = va();
@@ -223,7 +245,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Write the value of the specified vector.
      *
-     * @param v the vector to write (not null, unaffected)
+     * @param v the vector to write (not {@code null}, unaffected)
      */
     public void write(RVec3Arg v) {
         long recorderVa = va();
@@ -236,7 +258,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Write the specified text string.
      *
-     * @param javaString the string to write (not null)
+     * @param javaString the string to write (not {@code null})
      */
     public void write(String javaString) {
         long recorderVa = va();
@@ -246,7 +268,7 @@ public class StateRecorder extends NonCopyable {
     /**
      * Write the value of the specified vector.
      *
-     * @param v the vector to write (not null, unaffected)
+     * @param v the vector to write (not {@code null}, unaffected)
      */
     public void write(Vec3Arg v) {
         long recorderVa = va();
@@ -280,6 +302,8 @@ public class StateRecorder extends NonCopyable {
 
     native private static boolean readBoolean(long recorderVa, boolean b);
 
+    native private static void readContactSet(long recorderVa, long setVa);
+
     native private static float readFloat(long recorderVa, float f);
 
     native private static int readInt(long recorderVa, int i);
@@ -300,6 +324,8 @@ public class StateRecorder extends NonCopyable {
             long recorderVa, long vectorVa);
 
     native private static void writeBoolean(long recorderVa, boolean b);
+
+    native private static void writeContactSet(long recorderVa, long setVa);
 
     native private static void writeFloat(long recorderVa, float f);
 

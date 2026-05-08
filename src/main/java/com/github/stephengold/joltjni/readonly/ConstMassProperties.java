@@ -47,7 +47,7 @@ public interface ConstMassProperties extends ConstJoltPhysicsObject {
     /**
      * Copy the inertia tensor. The properties are unaffected.
      *
-     * @return a new matrix (in kilogram.meters squared)
+     * @return a new matrix (in kilogram.meters^2)
      */
     Mat44 getInertia();
 
@@ -57,4 +57,14 @@ public interface ConstMassProperties extends ConstJoltPhysicsObject {
      * @return the mass (in kilograms, &ge;0)
      */
     float getMass();
+
+    /**
+     * Test whether this object is equal to the argument. Both objects are
+     * unaffected.
+     *
+     * @param other the properties to compare with (not {@code null},
+     * unaffected)
+     * @return {@code true} if equal, {@code false} if unequal
+     */
+    boolean isEqual(ConstMassProperties other);
 }

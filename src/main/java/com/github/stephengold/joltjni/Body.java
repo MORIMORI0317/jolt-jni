@@ -25,8 +25,11 @@ import com.github.stephengold.joltjni.enumerate.EBodyType;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import com.github.stephengold.joltjni.readonly.ConstAaBox;
 import com.github.stephengold.joltjni.readonly.ConstBody;
+import com.github.stephengold.joltjni.readonly.ConstBodyCreationSettings;
+import com.github.stephengold.joltjni.readonly.ConstBroadPhaseLayerInterface;
 import com.github.stephengold.joltjni.readonly.ConstCollisionGroup;
 import com.github.stephengold.joltjni.readonly.ConstShape;
+import com.github.stephengold.joltjni.readonly.ConstSoftBodyCreationSettings;
 import com.github.stephengold.joltjni.readonly.QuatArg;
 import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
@@ -182,6 +185,22 @@ public class Body extends NonCopyable implements ConstBody {
     }
 
     /**
+     * Overwrite the state of the current rigid body with the specified creation
+     * settings. Not allowed when the body is in the physics system. Cannot add
+     * MotionProperties if the body was created without one.
+     *
+     * @param bcs the settings to apply (not {@code null}, unaffected)
+     * @param bpli the layer interface to use (not {@code null}, unaffected)
+     */
+    public void applyBodyCreationSettings(ConstBodyCreationSettings bcs,
+            ConstBroadPhaseLayerInterface bpli) {
+        long bodyVa = va();
+        long bcsVa = bcs.targetVa();
+        long bpliVa = bpli.targetVa();
+        applyBodyCreationSettings(bodyVa, bcsVa, bpliVa);
+    }
+
+    /**
      * Apply an impulse that simulates buoyancy and drag.
      *
      * @param surfacePosition the location of the fluid's surface (in system
@@ -222,6 +241,22 @@ public class Body extends NonCopyable implements ConstBody {
                 vx, vy, vz, gravityX, gravityY, gravityZ, deltaTime);
 
         return result;
+    }
+
+    /**
+     * Overwrite the state of the current soft body with the specified creation
+     * settings. Not allowed when the body is in the physics system.
+     *
+     * @param sbcs the settings to apply (not {@code null}, unaffected)
+     * @param bpli the layer interface to use (not {@code null}, unaffected)
+     */
+    public void applySoftBodyCreationSettings(
+            ConstSoftBodyCreationSettings sbcs,
+            ConstBroadPhaseLayerInterface bpli) {
+        long bodyVa = va();
+        long sbcsVa = sbcs.targetVa();
+        long bpliVa = bpli.targetVa();
+        applySoftBodyCreationSettings(bodyVa, sbcsVa, bpliVa);
     }
 
     /**
@@ -1151,11 +1186,17 @@ public class Body extends NonCopyable implements ConstBody {
     native private static void addTorque(
             long bodyVa, float x, float y, float z);
 
+    native private static void applyBodyCreationSettings(
+            long bodyVa, long bcsVa, long bpliVa);
+
     native private static boolean applyBuoyancyImpulse(long bodyVa,
             double surfaceX, double surfaceY, double surfaceZ, float nx,
             float ny, float nz, float buoyancy, float linearDrag,
             float angularDrag, float vx, float vy, float vz, float gravityX,
             float gravityY, float gravityZ, float deltaTime);
+
+    native private static void applySoftBodyCreationSettings(
+            long bodyVa, long sbcsVa, long bpliVa);
 
     native private static boolean canBeKinematicOrDynamic(long bodyVa);
 

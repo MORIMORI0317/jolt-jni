@@ -43,15 +43,11 @@ public class ContactKey extends JoltPhysicsObject implements ConstContactKey {
     }
 
     /**
-     * Instantiate a copy of the specified key.
+     * Instantiate a key with no native object assigned.
      *
-     * @param original the settings to copy (not {@code null}, unaffected)
+     * @param dummy unused argument to distinguish from the zero-arg constructor
      */
-    public ContactKey(ContactKey original) {
-        long originalVa = original.va();
-        long copyVa = createCopy(originalVa);
-        Runnable freeingAction = () -> free(copyVa);
-        setVirtualAddress(copyVa, freeingAction);
+    ContactKey(boolean dummy) {
     }
 
     /**
@@ -69,11 +65,28 @@ public class ContactKey extends JoltPhysicsObject implements ConstContactKey {
     }
 
     /**
-     * Instantiate a key with no native object assigned.
+     * Instantiate a copy of the specified key.
      *
-     * @param dummy unused argument to distinguish from the zero-arg constructor
+     * @param original the settings to copy (not {@code null}, unaffected)
      */
-    ContactKey(boolean dummy) {
+    public ContactKey(ContactKey original) {
+        long originalVa = original.va();
+        long copyVa = createCopy(originalVa);
+        Runnable freeingAction = () -> free(copyVa);
+        setVirtualAddress(copyVa, freeingAction);
+    }
+
+    /**
+     * Instantiate with the specified native object assigned.
+     *
+     * @param keyVa the virtual address of the native object to assign (not
+     * zero)
+     * @param owner {@code true} &rarr; make the JVM object the owner,
+     * {@code false} &rarr; it isn't the owner
+     */
+    ContactKey(long keyVa, boolean owner) {
+        Runnable freeingAction = owner ? () -> free(keyVa) : null;
+        setVirtualAddress(keyVa, freeingAction);
     }
     // *************************************************************************
     // new methods exposed
@@ -134,8 +147,8 @@ public class ContactKey extends JoltPhysicsObject implements ConstContactKey {
     }
 
     /**
-     * Test for equivalence with another key. The key is unaffected. (native
-     * operator: binary {@code ==})
+     * Test for content equivalence with another key. The key is unaffected.
+     * (native operator: binary {@code ==})
      *
      * @param other the key to compare with (not {@code null}, unaffected)
      * @return {@code true} if equivalent, otherwise {@code false}
@@ -150,8 +163,8 @@ public class ContactKey extends JoltPhysicsObject implements ConstContactKey {
     }
 
     /**
-     * Test for equivalence with another key. The key is unaffected.(native
-     * operator: binary {@code !=})
+     * Test for content equivalence with another key. The key is
+     * unaffected.(native operator: binary {@code !=})
      *
      * @param other the key to compare with (not {@code null}, unaffected)
      * @return {@code false} if equivalent, otherwise {@code true}
@@ -172,6 +185,22 @@ public class ContactKey extends JoltPhysicsObject implements ConstContactKey {
         long keyVa = va();
         long recorderVa = recorder.va();
         saveState(keyVa, recorderVa);
+    }
+    // *************************************************************************
+    // Object methods
+
+    /**
+     * Return a string representation of the properties object, which is
+     * unaffected.
+     *
+     * @return the string representation (not {@code null}, not empty)
+     */
+    @Override
+    public String toString() {
+        String result = String.format(
+                "ContactKey(body=%08x character=%08x subShape=%08x",
+                getBodyB(), getCharacterIdB(), getSubShapeIdB());
+        return result;
     }
     // *************************************************************************
     // native private methods

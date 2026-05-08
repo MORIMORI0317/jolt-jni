@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2024-2025 Stephen Gold
+Copyright (c) 2024-2026 Stephen Gold
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@ SOFTWARE.
 package com.github.stephengold.joltjni;
 
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
+import java.nio.FloatBuffer;
 
 /**
  * Utilities to locate the closest point on a line segment, triangle or
@@ -45,12 +46,12 @@ final public class ClosestPoint {
      * Calculate the barycentric coordinates of the point on the specified
      * (infinite) line that's closest to the origin.
      *
-     * @param a the location of a reference point on the line (not null,
+     * @param a the location of a reference point on the line (not {@code null},
      * unaffected)
-     * @param b the location of another reference point on the line (not null,
-     * unaffected)
-     * @param storeUv storage for the coordinates (not null, length&ge;2,
-     * modified)
+     * @param b the location of another reference point on the line (not
+     * {@code null}, unaffected)
+     * @param storeUv storage for the coordinates (not {@code null},
+     * length&ge;2, modified)
      * @return {@code true} if successful, {@code false} if the points do not
      * define a line
      */
@@ -72,14 +73,14 @@ final public class ClosestPoint {
      * Calculate the barycentric coordinates of the point on the specified plane
      * that's closest to the origin.
      *
-     * @param a the location of a reference point on the plane (not null,
-     * unaffected)
-     * @param b the location of another reference point on the plane (not null,
-     * unaffected)
-     * @param c the location of a 3rd reference point on the plane (not null,
-     * unaffected)
-     * @param storeUvw storage for the coordinates (not null, length&ge;3,
-     * modified)
+     * @param a the location of a reference point on the plane (not
+     * {@code null}, unaffected)
+     * @param b the location of another reference point on the plane (not
+     * {@code null}, unaffected)
+     * @param c the location of a 3rd reference point on the plane (not
+     * {@code null}, unaffected)
+     * @param storeUvw storage for the coordinates (not {@code null},
+     * length&ge;3, modified)
      * @return {@code true} if successful, {@code false} if the points do not
      * define a plane
      */
@@ -104,11 +105,11 @@ final public class ClosestPoint {
      * Locate the point on the specified line segment that's closest to the
      * origin.
      *
-     * @param a the location of the first end-point of the segment (not null,
-     * unaffected)
-     * @param b the location of the 2nd end-point of the segment (not null,
-     * unaffected)
-     * @param storeSet storage for the closest feature(s) (not null,
+     * @param a the location of the first end-point of the segment (not
+     * {@code null}, unaffected)
+     * @param b the location of the 2nd end-point of the segment (not
+     * {@code null}, unaffected)
+     * @param storeSet storage for the closest feature(s) (not {@code null},
      * length&ge;1, modified)
      * @return a new location vector
      */
@@ -120,7 +121,7 @@ final public class ClosestPoint {
         float bx = b.getX();
         float by = b.getY();
         float bz = b.getZ();
-        float[] storePoint = new float[3];
+        FloatBuffer storePoint = Temporaries.floatBuffer1.get();
         getClosestPointOnLine(ax, ay, az, bx, by, bz, storeSet, storePoint);
         Vec3 result = new Vec3(storePoint);
 
@@ -131,15 +132,15 @@ final public class ClosestPoint {
      * Locate the point on the specified tetrahedron that's closest to the
      * origin.
      *
-     * @param a the location of the first vertex of the tetrahedron (not null,
-     * unaffected)
-     * @param b the location of the 2nd vertex of the tetrahedron (not null,
-     * unaffected)
-     * @param c the location of the 3rd vertex of the tetrahedron (not null,
-     * unaffected)
-     * @param d the location of the 4th vertex of the tetrahedron (not null,
-     * unaffected)
-     * @param storeSet storage for the closest feature(s) (not null,
+     * @param a the location of the first vertex of the tetrahedron (not
+     * {@code null}, unaffected)
+     * @param b the location of the 2nd vertex of the tetrahedron (not
+     * {@code null}, unaffected)
+     * @param c the location of the 3rd vertex of the tetrahedron (not
+     * {@code null}, unaffected)
+     * @param d the location of the 4th vertex of the tetrahedron (not
+     * {@code null}, unaffected)
+     * @param storeSet storage for the closest feature(s) (not {@code null},
      * length&ge;1, modified)
      * @return a new location vector
      */
@@ -157,7 +158,7 @@ final public class ClosestPoint {
         float dx = d.getX();
         float dy = d.getY();
         float dz = d.getZ();
-        float[] storePoint = new float[3];
+        FloatBuffer storePoint = Temporaries.floatBuffer1.get();
         getClosestPointOnTetrahedron(ax, ay, az, bx, by, bz, cx, cy, cz,
                 dx, dy, dz, storeSet, storePoint);
         Vec3 result = new Vec3(storePoint);
@@ -168,13 +169,13 @@ final public class ClosestPoint {
     /**
      * Locate the point on the specified triangle that's closest to the origin.
      *
-     * @param a the location of the first vertex of the triangle (not null,
-     * unaffected)
-     * @param b the location of the 2nd vertex of the triangle (not null,
-     * unaffected)
-     * @param c the location of the 3rd vertex of the triangle (not null,
-     * unaffected)
-     * @param storeSet storage for the closest feature(s) (not null,
+     * @param a the location of the first vertex of the triangle (not
+     * {@code null}, unaffected)
+     * @param b the location of the 2nd vertex of the triangle (not
+     * {@code null}, unaffected)
+     * @param c the location of the 3rd vertex of the triangle (not
+     * {@code null}, unaffected)
+     * @param storeSet storage for the closest feature(s) (not {@code null},
      * length&ge;1, modified)
      * @return a new location vector
      */
@@ -189,7 +190,7 @@ final public class ClosestPoint {
         float cx = c.getX();
         float cy = c.getY();
         float cz = c.getZ();
-        float[] storePoint = new float[3];
+        FloatBuffer storePoint = Temporaries.floatBuffer1.get();
         getClosestPointOnTriangle(
                 ax, ay, az, bx, by, bz, cx, cy, cz, storeSet, storePoint);
         Vec3 result = new Vec3(storePoint);
@@ -208,14 +209,14 @@ final public class ClosestPoint {
 
     native private static void getClosestPointOnLine(
             float ax, float ay, float az, float bx, float by, float bz,
-            int[] storeSet, float[] storePoint);
+            int[] storeSet, FloatBuffer storePoint);
 
     native private static void getClosestPointOnTetrahedron(
             float ax, float ay, float az, float bx, float by, float bz,
             float cx, float cy, float cz, float dx, float dy, float dz,
-            int[] storeSet, float[] storePoint);
+            int[] storeSet, FloatBuffer storePoint);
 
-    native private static void getClosestPointOnTriangle(
-            float ax, float ay, float az, float bx, float by, float bz,
-            float cx, float cy, float cz, int[] storeSet, float[] storePoint);
+    native private static void getClosestPointOnTriangle(float ax, float ay,
+            float az, float bx, float by, float bz, float cx, float cy,
+            float cz, int[] storeSet, FloatBuffer storePoint);
 }

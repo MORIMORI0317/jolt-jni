@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2024-2025 Stephen Gold
+Copyright (c) 2024-2026 Stephen Gold
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,7 @@ import com.github.stephengold.joltjni.readonly.Mat44Arg;
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
 
 /**
- * The mass and inertial tensor of a {@code Body}. Used only during
- * construction.
+ * The mass and inertia tensor of a {@code Body}. Used only during construction.
  *
  * @author Stephen Gold sgold@sonic.net
  */
@@ -85,7 +84,7 @@ final public class MassProperties
     /**
      * Rotate the inertia by the specified 3x3 matrix.
      *
-     * @param rotation the rotation to apply (not null, unaffected)
+     * @param rotation the rotation to apply (not {@code null}, unaffected)
      */
     public void rotate(Mat44Arg rotation) {
         long propertiesVa = va();
@@ -97,7 +96,7 @@ final public class MassProperties
      * Scale the mass and inertia by the specified factors. Note that factors
      * can be &lt;0 to flip the shape.
      *
-     * @param scaleFactors the desired scaling (not null unaffected)
+     * @param scaleFactors the desired scaling (not {@code null}, unaffected)
      */
     public void scale(Vec3Arg scaleFactors) {
         long propertiesVa = va();
@@ -120,7 +119,8 @@ final public class MassProperties
     /**
      * Alter the inertia tensor. (native attribute: mInertia)
      *
-     * @param inertia the desired value (not null, unaffected, default=zero)
+     * @param inertia the desired value (not {@code null}, unaffected,
+     * default=zero)
      * @return the modified properties, for chaining
      */
     public MassProperties setInertia(Mat44Arg inertia) {
@@ -148,7 +148,7 @@ final public class MassProperties
      * Alter the mass and inertia to that of a box with the specified dimensions
      * and uniform density.
      *
-     * @param boxSize the edge lengths of the box (not null, unaffected)
+     * @param boxSize the edge lengths of the box (not {@code null}, unaffected)
      * @param density the density to use
      */
     public void setMassAndInertiaOfSolidBox(Vec3Arg boxSize, float density) {
@@ -162,7 +162,7 @@ final public class MassProperties
     /**
      * Translate the inertia by the specified offset.
      *
-     * @param offset the amount of translation (not null, unaffected)
+     * @param offset the amount of translation (not {@code null}, unaffected)
      */
     public void translate(Vec3Arg offset) {
         long propertiesVa = va();
@@ -178,8 +178,10 @@ final public class MassProperties
      * Decompose the inertia tensor into a diagonal matrix and a right-handed
      * rotation matrix. The properties are unaffected.
      *
-     * @param storeRotation storage for the rotation matrix (not null, modified)
-     * @param storeDiagonal storage for the diagonal matrix (not null, modified)
+     * @param storeRotation storage for the rotation matrix (not {@code null},
+     * modified)
+     * @param storeDiagonal storage for the diagonal matrix (not {@code null},
+     * modified)
      * @return {@code true} if successful, otherwise {@code false}
      */
     @Override
@@ -199,7 +201,7 @@ final public class MassProperties
      * Copy the inertia tensor. The properties are unaffected. (native
      * attribute: mInertia)
      *
-     * @return a new matrix (in kilogram.meters squared)
+     * @return a new matrix (in kilogram.meters^2)
      */
     @Override
     public Mat44 getInertia() {
@@ -222,6 +224,23 @@ final public class MassProperties
 
         return result;
     }
+
+    /**
+     * Test whether this object is equal to the argument. Both objects are
+     * unaffected. (native operator: binary {@code ==})
+     *
+     * @param other the properties to compare with (not {@code null},
+     * unaffected)
+     * @return {@code true} if equal, {@code false} if unequal
+     */
+    @Override
+    public boolean isEqual(ConstMassProperties other) {
+        long thisVa = va();
+        long otherVa = other.targetVa();
+        boolean result = isEqual(thisVa, otherVa);
+
+        return result;
+    }
     // *************************************************************************
     // Object methods
 
@@ -229,7 +248,7 @@ final public class MassProperties
      * Return a string representation of the properties object, which is
      * unaffected.
      *
-     * @return the string representation (not null, not empty)
+     * @return the string representation (not {@code null}, not empty)
      */
     @Override
     public String toString() {
@@ -252,6 +271,8 @@ final public class MassProperties
     native private static long getInertia(long propertiesVa);
 
     native private static float getMass(long propertiesVa);
+
+    native private static boolean isEqual(long thisVa, long otherVa);
 
     native private static void rotate(long propertiesVa, long matrixVa);
 

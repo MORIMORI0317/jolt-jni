@@ -137,12 +137,12 @@ final public class Vec3 implements Vec3Arg {
      * Instantiate from the specified position in the specified buffer.
      *
      * @param buffer the desired component values (not {@code null}, unaffected)
-     * @param startPos the starting position in the buffer (&ge;0)
+     * @param startPosition the starting position in the buffer (&ge;0)
      */
-    public Vec3(FloatBuffer buffer, int startPos) {
-        this.x = buffer.get(startPos);
-        this.y = buffer.get(startPos + 1);
-        this.z = buffer.get(startPos + 2);
+    public Vec3(FloatBuffer buffer, int startPosition) {
+        this.x = buffer.get(startPosition);
+        this.y = buffer.get(startPosition + 1);
+        this.z = buffer.get(startPosition + 2);
     }
 
     /**
@@ -347,7 +347,7 @@ final public class Vec3 implements Vec3Arg {
      * Set all 3 components from the specified buffer.
      *
      * @param buffer the desired component values (not {@code null},
-     * length&ge;3, unaffected)
+     * capacity&ge;3, unaffected)
      */
     public void set(FloatBuffer buffer) {
         this.x = buffer.get(0);
@@ -358,13 +358,14 @@ final public class Vec3 implements Vec3Arg {
     /**
      * Set all 3 components from the specified position in the specified buffer.
      *
-     * @param buffer the desired component values (not {@code null}, unaffected)
-     * @param startPos the starting position in the buffer (&ge;0)
+     * @param buffer the desired component values (not {@code null},
+     * capacity&ge;startPosition+3, unaffected)
+     * @param startPosition the starting position in the buffer (&ge;0)
      */
-    public void set(FloatBuffer buffer, int startPos) {
-        this.x = buffer.get(startPos);
-        this.y = buffer.get(startPos + 1);
-        this.z = buffer.get(startPos + 2);
+    public void set(FloatBuffer buffer, int startPosition) {
+        this.x = buffer.get(startPosition);
+        this.y = buffer.get(startPosition + 1);
+        this.z = buffer.get(startPosition + 2);
     }
 
     /**
@@ -670,31 +671,59 @@ final public class Vec3 implements Vec3Arg {
     }
 
     /**
+     * Copy all 3 components to the specified array. The vector is unaffected.
+     *
+     * @param storeArray the destination array (not {@code null}, length&ge;3)
+     */
+    @Override
+    public void copyTo(float[] storeArray) {
+        storeArray[0] = x;
+        storeArray[1] = y;
+        storeArray[2] = z;
+    }
+
+    /**
+     * Copy all 3 components to the specified position in the specified array.
+     * The vector is unaffected.
+     *
+     * @param storeArray the destination array (not {@code null},
+     * length&ge;startPosition+3)
+     * @param startPosition the starting position in the array (&ge;0)
+     */
+    @Override
+    public void copyTo(float[] storeArray, int startPosition) {
+        storeArray[startPosition] = x;
+        storeArray[startPosition + 1] = y;
+        storeArray[startPosition + 2] = z;
+    }
+
+    /**
      * Write all 3 components to the start of the specified buffer. The vector
      * is unaffected.
      *
-     * @param storeFloats the destination buffer (not {@code null},
+     * @param storeBuffer the destination buffer (not {@code null},
      * capacity&ge;3)
      */
     @Override
-    public void copyTo(FloatBuffer storeFloats) {
-        storeFloats.put(0, x);
-        storeFloats.put(1, y);
-        storeFloats.put(2, z);
+    public void copyTo(FloatBuffer storeBuffer) {
+        storeBuffer.put(0, x);
+        storeBuffer.put(1, y);
+        storeBuffer.put(2, z);
     }
 
     /**
      * Write all 3 components to the specified position in the specified buffer.
+     * The vector is unaffected.
      *
      * @param storeFloats the destination buffer (not {@code null},
-     * capacity&ge;startPos+3)
-     * @param startPos the starting position in the buffer (&ge;0)
+     * capacity&ge;startPosition+3)
+     * @param startPosition the starting position in the buffer (&ge;0)
      */
     @Override
-    public void copyTo(FloatBuffer storeFloats, int startPos) {
-        storeFloats.put(startPos, x);
-        storeFloats.put(startPos + 1, y);
-        storeFloats.put(startPos + 2, z);
+    public void copyTo(FloatBuffer storeFloats, int startPosition) {
+        storeFloats.put(startPosition, x);
+        storeFloats.put(startPosition + 1, y);
+        storeFloats.put(startPosition + 2, z);
     }
 
     /**
@@ -1070,7 +1099,7 @@ final public class Vec3 implements Vec3Arg {
     }
 
     /**
-     * Copy the components to an array. The vector is unaffected.
+     * Copy all 3 components to a new array. The vector is unaffected.
      *
      * @return a new array with length=3
      */
@@ -1085,7 +1114,7 @@ final public class Vec3 implements Vec3Arg {
     }
 
     /**
-     * Copy the components to a direct buffer. The vector is unaffected.
+     * Copy all 3 components to a new direct buffer. The vector is unaffected.
      *
      * @return a new direct buffer with capacity=3
      */
@@ -1098,7 +1127,7 @@ final public class Vec3 implements Vec3Arg {
     }
 
     /**
-     * Copy the components to a new location vector. The current vector is
+     * Copy all 3 components to a new location vector. The current vector is
      * unaffected.
      *
      * @return a new vector

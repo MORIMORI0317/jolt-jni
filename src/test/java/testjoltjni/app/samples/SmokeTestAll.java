@@ -21,10 +21,10 @@ SOFTWARE.
  */
 package testjoltjni.app.samples;
 
+import com.beust.jcommander.JCommander;
 import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EPhysicsUpdateError;
 import com.github.stephengold.joltjni.std.OfStream;
-import java.nio.ByteBuffer;
 import testjoltjni.TestUtils;
 import testjoltjni.app.samples.broadphase.*;
 import testjoltjni.app.samples.character.*;
@@ -48,14 +48,6 @@ import testjoltjni.app.samples.water.*;
  */
 final public class SmokeTestAll {
     // *************************************************************************
-    // constants
-
-    /**
-     * default number of physics steps to simulate during each invocation of
-     * {@code smokeTest()}
-     */
-    final private static int defaultNumSteps = 66;
-    // *************************************************************************
     // fields
 
     /**
@@ -78,19 +70,33 @@ final public class SmokeTestAll {
      * allocator shared by all physics test objects
      */
     private static TempAllocator tempAllocator;
+    /**
+     * parameters parsed from the command line
+     */
+    final private static TestParameters globalParameters = new TestParameters();
     // *************************************************************************
     // new methods exposed
 
     /**
      * Main entry point for the SmokeTestAll application.
      *
-     * @param arguments array of command-line arguments (not {@code null})
+     * @param arguments the command-line arguments (not {@code null})
      */
     public static void main(String... arguments) {
-        //TestUtils.traceAllocations = true;
+        // Parse the command-line arguments:
+        JCommander jCommander = new JCommander(globalParameters);
+        jCommander.parse(arguments);
+        jCommander.setProgramName("SmokeTestAll");
+        if (globalParameters.helpOnly()) {
+            jCommander.usage();
+            System.exit(0);
+        }
+
+        TestUtils.traceAllocations = globalParameters.traceAllocations();
         TestUtils.loadNativeLibrary();
         TestUtils.initializeNativeLibrary();
 
+        // Log the configuration:
         System.out.println(Jolt.getConfigurationString());
         System.out.print(" built-in compute systems:");
         System.out.print(Jolt.implementsComputeCpu() ? " CPU" : "");
@@ -149,18 +155,20 @@ final public class SmokeTestAll {
 
             case "Metal":
                 // Assign a loader for Metal compute shaders:
-                Loader mtlLoader = makeLoader("/mtl/com/github/stephengold");
+                Loader mtlLoader = CustomLoader.newLoader(
+                        "/mtl/com/github/stephengold");
                 computeSystem.setShaderLoader(mtlLoader);
                 break;
 
             case "Vulkan":
                 // Assign a loader for Vulkan compute shaders:
-                Loader vkLoader = makeLoader("/vk/com/github/stephengold");
+                Loader vkLoader = CustomLoader.newLoader(
+                        "/vk/com/github/stephengold");
                 computeSystem.setShaderLoader(vkLoader);
                 break;
 
             default:
-                throw new RuntimeException("typeName = " + systemName);
+                throw new RuntimeException("systemName = " + systemName);
         }
 
         // All tests share a single ComputeQueue:
@@ -168,25 +176,6 @@ final public class SmokeTestAll {
         assert !queueResult.hasError();
         ComputeQueueRef queueRef = queueResult.get();
         queue = queueRef.getPtr();
-    }
-
-    /**
-     * Create a custom loader that loads from the specified resource directory.
-     *
-     * @param resourcePath the path to the resource directory (not {@code null})
-     * @return a new loader
-     */
-    private static Loader makeLoader(String resourcePath) {
-        Loader result = new CustomLoader() {
-            @Override
-            public ByteBuffer loadShader(String shaderName) {
-                String path = resourcePath + "/" + shaderName;
-                ByteBuffer result = Jolt.loadResourceAsBytes(path);
-                return result;
-            }
-        };
-
-        return result;
     }
 
     /**
@@ -219,7 +208,8 @@ final public class SmokeTestAll {
      * @param test the Test object to use (not {@code null})
      */
     private static void smokeTest(Test test) {
-        smokeTest(test, defaultNumSteps);
+        int numSteps = globalParameters.numSteps();
+        smokeTest(test, numSteps);
     }
 
     /**
@@ -259,16 +249,29 @@ final public class SmokeTestAll {
         test.Initialize();
 
         // Single-step the physics numSteps times:
-        for (int i = 0; i < numSteps; ++i) {
+        for (int stepIndex = 1; stepIndex <= numSteps; ++stepIndex) {
+            if (globalParameters.verboseLogging()) {
+                System.out.printf(
+                        "---- step #%d%n      pre-update%n", stepIndex);
+                System.out.flush();
+            }
             PreUpdateParams params = new PreUpdateParams();
             params.mDeltaTime = 0.02f;
             test.PrePhysicsUpdate(params);
 
+            if (globalParameters.verboseLogging()) {
+                System.out.printf("      update%n");
+                System.out.flush();
+            }
             int collisionSteps = 1;
             int errors = physicsSystem.update(params.mDeltaTime, collisionSteps,
                     tempAllocator, jobSystem);
             assert errors == EPhysicsUpdateError.None : errors;
 
+            if (globalParameters.verboseLogging()) {
+                System.out.printf("      post-update%n");
+                System.out.flush();
+            }
             test.PostPhysicsUpdate(params.mDeltaTime);
         }
 

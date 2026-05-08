@@ -146,6 +146,19 @@ public class RagdollSettings extends JoltPhysicsObject implements RefTarget {
     }
 
     /**
+     * Return the index of the constraint upstream from the specified body.
+     *
+     * @param bodyIndex index of the body in the ragdoll (&ge;0)
+     * @return the constraint index
+     */
+    public int getConstraintIndexForBodyIndex(int bodyIndex) {
+        long settingsVa = va();
+        int result = getConstraintIndexForBodyIndex(settingsVa, bodyIndex);
+
+        return result;
+    }
+
+    /**
      * Access the skeleton. (native attribute: mSkeleton)
      *
      * @return a new JVM object with the pre-existing native object assigned
@@ -178,7 +191,7 @@ public class RagdollSettings extends JoltPhysicsObject implements RefTarget {
      */
     public void saveBinaryState(
             StreamOut stream, boolean saveShapes, boolean saveGroupFilter) {
-        long settingsVa = targetVa();
+        long settingsVa = va();
         long streamVa = stream.va();
         saveBinaryState(settingsVa, streamVa, saveShapes, saveGroupFilter);
     }
@@ -276,6 +289,9 @@ public class RagdollSettings extends JoltPhysicsObject implements RefTarget {
             long settingsVa, int groupId, long userData, long systemVa);
 
     native static void disableParentChildCollisions(long settingsVa);
+
+    native static int getConstraintIndexForBodyIndex(
+            long settingsVa, int bodyIndex);
 
     native static int getNumParts(long settingsVa);
 

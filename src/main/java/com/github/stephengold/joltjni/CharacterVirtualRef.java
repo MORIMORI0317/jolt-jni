@@ -55,11 +55,11 @@ final public class CharacterVirtualRef
     }
 
     /**
-     * Instantiate a reference to the specified target.
+     * Instantiate a reference to the specified character.
      *
      * @param refVa the virtual address of the native object to assign (not
      * zero)
-     * @param target the target JVM object (not {@code null})
+     * @param target the character to target (not {@code null})
      */
     CharacterVirtualRef(long refVa, CharacterVirtual target) {
         this.ptr = target;
@@ -261,12 +261,10 @@ final public class CharacterVirtualRef
     @Override
     public Vec3 cancelVelocityTowardsSteepSlopes(Vec3Arg desiredVelocity) {
         long characterVa = targetVa();
-        float vx = desiredVelocity.getX();
-        float vy = desiredVelocity.getY();
-        float vz = desiredVelocity.getZ();
-        float[] storeVelocity = new float[3];
+        FloatBuffer storeVelocity = Temporaries.floatBuffer1.get();
+        desiredVelocity.copyTo(storeVelocity);
         CharacterVirtual.cancelVelocityTowardsSteepSlopes(
-                characterVa, vx, vy, vz, storeVelocity);
+                characterVa, storeVelocity);
         Vec3 result = new Vec3(storeVelocity);
 
         return result;
@@ -302,9 +300,10 @@ final public class CharacterVirtualRef
         long characterVa = targetVa();
         int numContacts = CharacterVirtual.countActiveContacts(characterVa);
         ConstContact[] result = new ConstContact[numContacts];
+        PhysicsSystem system = getPhysicsSystem();
         for (int i = 0; i < numContacts; ++i) {
             long contactVa = CharacterVirtual.getActiveContact(characterVa, i);
-            result[i] = new Contact(contactVa, true);
+            result[i] = new Contact(contactVa, true, system);
         }
 
         return result;

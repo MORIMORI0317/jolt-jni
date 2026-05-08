@@ -112,6 +112,21 @@ JNIEXPORT void JNICALL Java_com_github_stephengold_joltjni_Body_addTorque
 
 /*
  * Class:     com_github_stephengold_joltjni_Body
+ * Method:    applyBodyCreationSettings
+ * Signature: (JJJ)V
+ */
+JNIEXPORT void JNICALL Java_com_github_stephengold_joltjni_Body_applyBodyCreationSettings
+  (JNIEnv *, jclass, jlong bodyVa, jlong bcsVa, jlong bpliVa) {
+    Body * const pBody = reinterpret_cast<Body *> (bodyVa);
+    const BodyCreationSettings * const pBCS
+            = reinterpret_cast<BodyCreationSettings *> (bcsVa);
+    const BroadPhaseLayerInterface * const pBPLI
+            = reinterpret_cast<BroadPhaseLayerInterface *> (bpliVa);
+    pBody->ApplyBodyCreationSettings(*pBCS, *pBPLI);
+}
+
+/*
+ * Class:     com_github_stephengold_joltjni_Body
  * Method:    applyBuoyancyImpulse
  * Signature: (JDDDFFFFFFFFFFFFF)Z
  */
@@ -128,6 +143,21 @@ JNIEXPORT jboolean JNICALL Java_com_github_stephengold_joltjni_Body_applyBuoyanc
     const bool result = pBody->ApplyBuoyancyImpulse(surface, normal, buoyancy,
             linearDrag, angularDrag, velocity, gravity, deltaTime);
     return result;
+}
+
+/*
+ * Class:     com_github_stephengold_joltjni_Body
+ * Method:    applySoftBodyCreationSettings
+ * Signature: (JJJ)V
+ */
+JNIEXPORT void JNICALL Java_com_github_stephengold_joltjni_Body_applySoftBodyCreationSettings
+  (JNIEnv *, jclass, jlong bodyVa, jlong sbcsVa, jlong bpliVa) {
+    Body * const pBody = reinterpret_cast<Body *> (bodyVa);
+    const SoftBodyCreationSettings * const pSBCS
+            = reinterpret_cast<SoftBodyCreationSettings *> (sbcsVa);
+    const BroadPhaseLayerInterface * const pBPLI
+            = reinterpret_cast<BroadPhaseLayerInterface *> (bpliVa);
+    pBody->ApplySoftBodyCreationSettings(*pSBCS, *pBPLI);
 }
 
 /*

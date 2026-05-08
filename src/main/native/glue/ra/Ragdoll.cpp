@@ -103,6 +103,22 @@ JNIEXPORT void JNICALL Java_com_github_stephengold_joltjni_Ragdoll_driveToPoseUs
 
 /*
  * Class:     com_github_stephengold_joltjni_Ragdoll
+ * Method:    driveToPoseUsingMotorsPv
+ * Signature: (JJJF)V
+ */
+JNIEXPORT void JNICALL Java_com_github_stephengold_joltjni_Ragdoll_driveToPoseUsingMotorsPv
+  (JNIEnv *, jclass, jlong ragdollVa, jlong prevPoseVa, jlong poseVa,
+  float deltaTime) {
+    Ragdoll * const pRagdoll = reinterpret_cast<Ragdoll *> (ragdollVa);
+    const SkeletonPose * const pPrevPose
+            = reinterpret_cast<SkeletonPose *> (prevPoseVa);
+    const SkeletonPose * const pPose
+            = reinterpret_cast<SkeletonPose *> (poseVa);
+    pRagdoll->DriveToPoseUsingMotors(*pPrevPose, *pPose, deltaTime);
+}
+
+/*
+ * Class:     com_github_stephengold_joltjni_Ragdoll
  * Method:    getBodyCount
  * Signature: (J)I
  */
@@ -135,6 +151,19 @@ JNIEXPORT void JNICALL Java_com_github_stephengold_joltjni_Ragdoll_getBodyIds
 
 /*
  * Class:     com_github_stephengold_joltjni_Ragdoll
+ * Method:    getConstraint
+ * Signature: (JI)J
+ */
+JNIEXPORT jlong JNICALL Java_com_github_stephengold_joltjni_Ragdoll_getConstraint
+  (JNIEnv *, jclass, jlong ragdollVa, jint constraintIndex) {
+    Ragdoll * const pRagdoll = reinterpret_cast<Ragdoll *> (ragdollVa);
+    TwoBodyConstraint * const pResult
+            = pRagdoll->GetConstraint(constraintIndex);
+    return reinterpret_cast<jlong> (pResult);
+}
+
+/*
+ * Class:     com_github_stephengold_joltjni_Ragdoll
  * Method:    getConstraintCount
  * Signature: (J)I
  */
@@ -148,22 +177,20 @@ JNIEXPORT jint JNICALL Java_com_github_stephengold_joltjni_Ragdoll_getConstraint
 /*
  * Class:     com_github_stephengold_joltjni_Ragdoll
  * Method:    getPose
- * Signature: (J[DJZ)V
+ * Signature: (JLjava/nio/DoubleBuffer;JZ)V
  */
 JNIEXPORT void JNICALL Java_com_github_stephengold_joltjni_Ragdoll_getPose
-  (JNIEnv *pEnv, jclass, jlong ragdollVa, jdoubleArray storeDoubles,
+  (JNIEnv *pEnv, jclass, jlong ragdollVa, jobject storeDoubles,
   jlong storeMatsVa, jboolean lockBodies) {
     Ragdoll * const pRagdoll = reinterpret_cast<Ragdoll *> (ragdollVa);
     RVec3 rootOffset;
     Mat44 * const pMatrices = reinterpret_cast<Mat44 *> (storeMatsVa);
     pRagdoll->GetPose(rootOffset, pMatrices, lockBodies);
-    jboolean isCopy;
-    jdouble * const pStoreDoubles
-            = pEnv->GetDoubleArrayElements(storeDoubles, &isCopy);
+    DIRECT_DOUBLE_BUFFER(pEnv, storeDoubles, pStoreDoubles, capacityDoubles);
+    JPH_ASSERT(capacityDoubles >= 3);
     pStoreDoubles[0] = rootOffset.GetX();
     pStoreDoubles[1] = rootOffset.GetY();
     pStoreDoubles[2] = rootOffset.GetZ();
-    pEnv->ReleaseDoubleArrayElements(storeDoubles, pStoreDoubles, 0);
 }
 
 /*
@@ -193,29 +220,26 @@ JNIEXPORT jint JNICALL Java_com_github_stephengold_joltjni_Ragdoll_getRefCount
 /*
  * Class:     com_github_stephengold_joltjni_Ragdoll
  * Method:    getRootTransform
- * Signature: (J[D[FZ)V
+ * Signature: (JLjava/nio/DoubleBuffer;Ljava/nio/FloatBuffer;Z)V
  */
 JNIEXPORT void JNICALL Java_com_github_stephengold_joltjni_Ragdoll_getRootTransform
-  (JNIEnv *pEnv, jclass, jlong ragdollVa, jdoubleArray storeDoubles,
-  jfloatArray storeFloats, jboolean lockBodies) {
+  (JNIEnv *pEnv, jclass, jlong ragdollVa, jobject storeDoubles,
+  jobject storeFloats, jboolean lockBodies) {
     const Ragdoll * const pRagdoll = reinterpret_cast<Ragdoll *> (ragdollVa);
     RVec3 outPosition;
     Quat outRotation;
     pRagdoll->GetRootTransform(outPosition, outRotation, lockBodies);
-    jboolean isCopy;
-    jdouble * const pStoreDoubles
-            = pEnv->GetDoubleArrayElements(storeDoubles, &isCopy);
+    DIRECT_DOUBLE_BUFFER(pEnv, storeDoubles, pStoreDoubles, capacityDoubles);
+    JPH_ASSERT(capacityDoubles >= 3);
     pStoreDoubles[0] = outPosition.GetX();
     pStoreDoubles[1] = outPosition.GetY();
     pStoreDoubles[2] = outPosition.GetZ();
-    pEnv->ReleaseDoubleArrayElements(storeDoubles, pStoreDoubles, 0);
-    jfloat * const pStoreFloats
-            = pEnv->GetFloatArrayElements(storeFloats, &isCopy);
+    DIRECT_FLOAT_BUFFER(pEnv, storeFloats, pStoreFloats, capacityFloats);
+    JPH_ASSERT(capacityFloats >= 4);
     pStoreFloats[0] = outRotation.GetX();
     pStoreFloats[1] = outRotation.GetY();
     pStoreFloats[2] = outRotation.GetZ();
     pStoreFloats[3] = outRotation.GetW();
-    pEnv->ReleaseFloatArrayElements(storeFloats, pStoreFloats, 0);
 }
 
 /*
